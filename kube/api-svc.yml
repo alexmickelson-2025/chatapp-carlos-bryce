@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: chat-app-api-service
-  namespace: distributed-chat-alex
+  namespace: distributed-chat-bryce-carlos
 spec:
   selector:
     app: chat-app-api

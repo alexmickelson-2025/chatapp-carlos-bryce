@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: distributed-chat-alex
+  namespace: distributed-chat-bryce-carlos
   name: db-svc
   labels:
     app: db-svc

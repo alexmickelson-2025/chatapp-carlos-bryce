@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: distributed-chat-alex
+  namespace: distributed-chat-bryce-carlos
   name: chat-db-deployment
   labels:
     app: chat-db

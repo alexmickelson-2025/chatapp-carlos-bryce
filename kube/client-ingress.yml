@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: chat-app-client-ingress
-  namespace: distributed-chat-alex
+  namespace: distributed-chat-bryce-carlos
 spec:
   rules:
     - host: alex-react.duckdns.org

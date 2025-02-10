@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: distributed-chat-alex
+  namespace: distributed-chat-bryce-carlos
   name: db-pvc
   labels:
     app: chat-db
