@@ -5,7 +5,7 @@ metadata:
   namespace: distributed-chat-bryce-carlos
 spec:
   rules:
-    - host: alex-react.duckdns.org
+    - host: carlos-bryce-chat.duckdns.org
       http:
         paths:
           - path: /api
