@@ -20,12 +20,12 @@ spec:
     spec:
       containers:
         - name: chat-app-api
-          image: alexmickelson/distributed-chat-api:${IMAGE_TAG}
+          image: brycecoon/distributed-chat-api:${IMAGE_TAG}
           ports:
             - containerPort: 8080
           env:
-          - name: DB_CONNECTION_STRING
-            value: Server=db-svc;Port=5432;Userid=chat_user;Password=secure_password;Database=chat_db"
+            - name: DB_CONNECTION_STRING
+              value: Server=db-svc;Port=5432;Userid=chat_user;Password=secure_password;Database=chat_db"
           readinessProbe:
             httpGet:
               path: /health

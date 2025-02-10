@@ -2,7 +2,7 @@ name: Build and deploy on kubernetes
 on:
   push:
     branches:
-    - main
+      - main
   workflow_dispatch:
 
 jobs:
@@ -22,19 +22,19 @@ jobs:
         run: |
           docker build \
             -f Api/Dockerfile \
-            -t alexmickelson/distributed-chat-api:${{ github.run_number }} \
-            -t alexmickelson/distributed-chat-api:latest \
+            -t brycecoon/distributed-chat-api:${{ github.run_number }} \
+            -t brycecoon/distributed-chat-api:latest \
             .
-          
-          docker push alexmickelson/distributed-chat-api --all-tags
+
+          docker push brycecoon/distributed-chat-api --all-tags
 
           docker build \
             -f Client/Dockerfile \
-            -t alexmickelson/distributed-chat-client:${{ github.run_number }} \
-            -t alexmickelson/distributed-chat-client:latest \
+            -t brycecoon/distributed-chat-client:${{ github.run_number }} \
+            -t brycecoon/distributed-chat-client:latest \
             .
-          
-          docker push alexmickelson/distributed-chat-client --all-tags
+
+          docker push brycecoon/distributed-chat-client --all-tags
 
       - name: Deploy to Kubernetes
         run: |
@@ -42,8 +42,8 @@ jobs:
 
           export IMAGE_TAG=${{ github.run_number }}
 
-          kubectl -n distributed-chat-alex delete configmap db-init || true
-          kubectl -n distributed-chat-alex create configmap db-init --from-file=init.sql
+          kubectl -n distributed-chat-bryce-carlos delete configmap db-init || true
+          kubectl -n distributed-chat-bryce-carlos create configmap db-init --from-file=init.sql
 
           for file in kube/*; do 
               cat "$file" | envsubst | kubectl apply -f -; 

@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: chat-app-client
-          image: alexmickelson/distributed-chat-client:${IMAGE_TAG}
+          image: brycecoon/distributed-chat-client:${IMAGE_TAG}
           ports:
             - containerPort: 8080
           readinessProbe:
