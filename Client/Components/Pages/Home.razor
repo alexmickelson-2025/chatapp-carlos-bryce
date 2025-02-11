@@ -1,7 +1,80 @@
 ﻿@page "/"
+@using Logic
+@using System.Text.Json
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h3>Send a Message</h3>
 
-Welcome to your new app.
+<div class="form-container">
+    <label for="keyInput" class="form-label">Sender:</label>
+    <input type="text" id="keyInput" @bind="author" class="form-input" />
+
+    <label for="valueInput" class="form-label">Message:</label>
+    <input type="text" id="valueInput" @bind="messageContent" class="form-input" />
+
+    <button @onclick="createMessage" class="btn btn-primary">Send</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="error-message">@errorMessage</div>
+    }
+</div>
+
+<button @onclick="getAllMessages" class="btn btn-secondary">Get Messages</button>
+
+<h2>Messages</h2>
+<div class="messages-container">
+    @foreach(var message in messages)
+    {
+        <div class="message-card">
+            <div class="message-author"><strong>@message.author</strong></div>
+            <div class="message-content">@message.content</div>
+            <div class="message-time">@message.creationtime</div>
+        </div>
+    }
+</div>
+
+
+
+@code {
+    public HttpClient httpClient = new HttpClient();
+    string url = Environment.GetEnvironmentVariable("API_URL") ?? throw new Exception("API_URL environment variable not set");
+    string author;
+    string messageContent;
+    string errorMessage;
+    List<Message> messages = new List<Message>();
+        Random random = new Random();
+
+
+    private async Task createMessage()
+    {
+        if(author == null || messageContent == null)
+        {
+            errorMessage = "author or message is null";
+            return;
+        }
+        else {
+            errorMessage = "";
+            Console.WriteLine("author and message exists");
+        }
+
+        var now = new DateTime(
+            DateTime.Now.Year, 
+            DateTime.Now.Month,
+            DateTime.Now.Day, 
+            DateTime.Now.Hour, 
+            DateTime.Now.Minute, 
+            0
+        );
+        int randomNumber = random.Next(1, 100001);
+        var newMessage = new Message(randomNumber, author, messageContent, now.ToString());
+
+        await httpClient.PostAsJsonAsync<Message>(url + "/message/addMessage", newMessage);
+    }
+    private async Task getAllMessages()
+    {
+        messages = await httpClient.GetFromJsonAsync<List<Message>>(url + "/message/getMessages");
+    }
+}    
