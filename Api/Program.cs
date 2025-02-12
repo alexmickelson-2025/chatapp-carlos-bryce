@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 var app = builder.Build();
 
 app.MapGet("/", () => "healthy");
+app.MapGet("/api", () => "something else");
 
 app.MapControllers();
 app.Run();
