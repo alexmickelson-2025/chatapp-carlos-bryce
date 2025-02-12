@@ -25,7 +25,7 @@ spec:
             - containerPort: 8080
           env:
             - name: DB_CONNECTION_STRING
-              value: Server=db-svc;Port=5432;Userid=chat_user;Password=secure_password;Database=chat_db"
+              value: Server=db-svc;Port=5432;Userid=chat_user;Password=dbpassword;Database=chat_db"
           readinessProbe:
             httpGet:
               path: /health

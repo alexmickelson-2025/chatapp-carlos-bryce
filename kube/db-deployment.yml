@@ -24,7 +24,7 @@ spec:
             - name: POSTGRES_USER
               value: "chat_user"
             - name: POSTGRES_PASSWORD
-              value: "secure_password" # Replace with a secure password
+              value: "dbpassword" 
           ports:
             - containerPort: 5432
           volumeMounts:
