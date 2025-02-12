@@ -7,6 +7,8 @@
 
 <div>API URL: @url</div>
 <h3>Send a Message</h3>
+<div>ID: @Id</div>
+<div>Counter: @localCounter</div>
 
 <div class="form-container">
     <label for="keyInput" class="form-label">Sender:</label>
@@ -30,9 +32,12 @@
     @foreach(var message in messages)
     {
         <div class="message-card">
+            <div class="message-time">ClientId: @message.clientid</div>
+            <div class="message-time">MessageId:@message.messageid</div>
             <div class="message-author"><strong>@message.author</strong></div>
             <div class="message-content">@message.content</div>
             <div class="message-time">@message.creationtime</div>
+            <div class="message-time">@message.clockcounter</div>
         </div>
     }
 </div>
@@ -45,9 +50,10 @@
     string author;
     string messageContent;
     string errorMessage;
-    //does this work
     List<Message> messages = new List<Message>();
     Random random = new Random();
+    int localCounter = 0;
+    Guid Id = Guid.NewGuid();
 
 
     private async Task createMessage()
@@ -70,13 +76,25 @@
             DateTime.Now.Minute, 
             0
         );
-        int randomNumber = random.Next(1, 100001);
-        var newMessage = new Message(randomNumber, author, messageContent, now.ToString());
 
+        localCounter += 1;
+        var newMessage = new Message(Id, author, messageContent, now.ToString(), localCounter);
         await httpClient.PostAsJsonAsync<Message>(url + "/message/addMessage", newMessage);
     }
     private async Task getAllMessages()
     {
         messages = await httpClient.GetFromJsonAsync<List<Message>>(url + "/message/getMessages");
+
+            if (messages is null || messages.Count == 0)
+            {
+                throw new Exception("messages was null");
+            }
+
+        int maxCounter = messages.Max(m => m.clockcounter);
+        localCounter = Math.Max(localCounter, messages.Where(m => m.clockcounter == maxCounter).FirstOrDefault().clockcounter) + 1;
+        messages = messages
+            .OrderBy(m => m.clockcounter)
+            .ThenBy(m => m.clientid)
+            .ToList();
     }
 }    

@@ -9,4 +9,9 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<Message> message { get; set; }  
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Message>()
+            .HasKey(m => m.messageid);
+    }
 }
