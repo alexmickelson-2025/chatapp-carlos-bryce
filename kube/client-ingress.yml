@@ -8,7 +8,7 @@ spec:
     - host: carlos-bryce-chat.duckdns.org
       http:
         paths:
-          - path: /client
+          - path: /
             pathType: Prefix
             backend:
               service:
