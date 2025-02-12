@@ -23,7 +23,7 @@ spec:
           image: brycecoon/distributed-chat-client:${IMAGE_TAG}
           env:
           - name: API_URL
-            value: "carlos-bryce-chat.duckdns.org/api"
+            value: "http://carlos-bryce-chat.duckdns.org/api"
           ports:
             - containerPort: 8080
           readinessProbe:
