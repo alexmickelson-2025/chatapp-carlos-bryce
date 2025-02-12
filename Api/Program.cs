@@ -10,7 +10,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 var app = builder.Build();
 
-app.MapGet("/", () => "hello World!");
+app.MapGet("/", () => "healthy");
 
 app.MapControllers();
 app.Run();
