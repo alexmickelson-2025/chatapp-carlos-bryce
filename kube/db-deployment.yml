@@ -20,11 +20,11 @@ spec:
           image: postgres:16
           env:
             - name: POSTGRES_DB
-              value: "chat_db"
+              value: "postgres"
             - name: POSTGRES_USER
-              value: "chat_user"
+              value: "postgres"
             - name: POSTGRES_PASSWORD
-              value: "dbpassword" 
+              value: "postgres" 
           ports:
             - containerPort: 5432
           volumeMounts:
