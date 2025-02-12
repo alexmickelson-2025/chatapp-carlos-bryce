@@ -4,11 +4,11 @@ metadata:
   namespace: distributed-chat-bryce-carlos
   name: db-svc
   labels:
-    app: db-svc
+    app: chat-db
 spec:
   type: ClusterIP
   ports:
     - port: 5432
       targetPort: 5432
   selector:
-    app: db-svc
+    app: chat-db
