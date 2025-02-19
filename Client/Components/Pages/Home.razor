@@ -1,11 +1,14 @@
 ﻿@page "/"
 @using Logic
 @using System.Text.Json
+@using System.Text
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
+<div>@apiWorks</div>
 <div>API URL: @url</div>
+
 <h3>Send a Message</h3>
 <div>ID: @Id</div>
 <div>Counter: @localCounter</div>
@@ -16,16 +19,31 @@
 
     <label for="valueInput" class="form-label">Message:</label>
     <input type="text" id="valueInput" @bind="messageContent" class="form-input" />
+    <div id="image-add" >
+<label for="image">
+          Enter an Image
+</label>
+<div>
+
+<InputFile OnChange="OnFileChange" />
+
+
+@if (errorMessage != null)
+{
+    <div class="text-danger">@errorMessage</div>
+}
+</div>
+</div>
 
     <button @onclick="createMessage" class="btn btn-primary">Send</button>
 
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="error-message">@errorMessage</div>
-    }
+        <div class="error-message">@fileErrorMessage</div>
+
 </div>
 
 <button @onclick="getAllMessages" class="btn btn-secondary">Get Messages</button>
+<button @onclick="deleteAllMessages" class="btn btn-secondary">Delete All Messages</button>
+
 
 <h2>Messages</h2>
 <div class="messages-container">
@@ -38,6 +56,7 @@
             <div class="message-content">@message.content</div>
             <div class="message-time">@message.creationtime</div>
             <div class="message-time">@message.clockcounter</div>
+            <img src=@($"http://localhost:{ImageApiPort}/images/{message.imagepath}") alt="Could not load image"/>
         </div>
     }
 </div>
@@ -47,13 +66,17 @@
 @code {
     public HttpClient httpClient = new HttpClient();
     string url = Environment.GetEnvironmentVariable("API_URL") ?? throw new Exception("API_URL environment variable not set");
+    string ImageApiPort = Environment.GetEnvironmentVariable("IMAGE_API_PORT") ?? throw new Exception("IMAGE_API_PORT environment variable not set");
+
     string author;
     string messageContent;
+    IBrowserFile? imageToUpload;
     string errorMessage;
     List<Message> messages = new List<Message>();
     Random random = new Random();
     int localCounter = 0;
     Guid Id = Guid.NewGuid();
+    string apiWorks = "Nothing yet";
 
 
     private async Task createMessage()
@@ -78,17 +101,40 @@
         );
 
         localCounter += 1;
-        var newMessage = new Message(Id, author, messageContent, now.ToString(), localCounter);
-        await httpClient.PostAsJsonAsync<Message>(url + "/message/addMessage", newMessage);
+        var newMessage = new Message(Id, author, messageContent, now.ToString(), localCounter, null);
+        MultipartFormDataContent content = new MultipartFormDataContent();
+
+        if(imageToUpload is not null)
+        {
+        var stream = imageToUpload.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB max
+        var fileContent = new StreamContent(stream);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageToUpload.ContentType);
+        content.Add(fileContent, "image", imageToUpload.Name); 
+        }
+
+        var messageJson = JsonSerializer.Serialize(newMessage);
+        var messageFormContent = new StringContent(messageJson, Encoding.UTF8, "application/json");
+
+        content.Add(messageFormContent, "message");
+
+        Console.WriteLine("new Message was " + content);
+
+        await httpClient.PostAsync(url + "/api/message/addMessage", content);
+
     }
     private async Task getAllMessages()
     {
-        messages = await httpClient.GetFromJsonAsync<List<Message>>(url + "/message/getMessages");
+        messages = await httpClient.GetFromJsonAsync<List<Message>>(url + "/api/message/getMessages");
 
-            if (messages is null || messages.Count == 0)
-            {
-                throw new Exception("messages was null");
-            }
+        if (messages is null)
+        {
+            throw new Exception("messages was null");
+        }
+        if(messages.Count == 0)
+        {
+            errorMessage = "Messages were empty";
+            return;
+        }
 
         int maxCounter = messages.Max(m => m.clockcounter);
         localCounter = Math.Max(localCounter, messages.Where(m => m.clockcounter == maxCounter).FirstOrDefault().clockcounter) + 1;
@@ -97,4 +143,35 @@
             .ThenBy(m => m.clientid)
             .ToList();
     }
+    private async Task deleteAllMessages(MouseEventArgs args)
+    {
+        await httpClient.DeleteAsync(url + "/api/message/deleteAllMessages");
+    }
+
+     private string? fileErrorMessage;
+
+ private async Task OnFileChange(InputFileChangeEventArgs e)    {
+        var file = e.File;
+        
+        if (file == null)
+        {
+            fileErrorMessage = "No file selected.";
+            return;
+        }
+
+        var fileType = file.ContentType;
+
+        if (!fileType.Contains("png"))
+        {
+            fileErrorMessage = "Please select a PNG image file.";
+        }
+        else
+        {
+            errorMessage = null;
+
+            imageToUpload = e.File;
+        }
+    }
+
+    
 }    

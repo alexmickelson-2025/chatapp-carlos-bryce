@@ -6,6 +6,7 @@ services:
     command: dotnet run --project Client
     environment:
       - API_URL=http://api:8080
+      - IMAGE_API_PORT=5104
     ports:
       - 8080:8080
   api:
@@ -15,6 +16,8 @@ services:
     command: dotnet run --project Api
     environment:
       - CONNECTION_STRING=Server=db;Database=postgres;User Id=postgres;Password=postgres;
+      - IMAGE_API_URL=http://image-api:5104
+
 
   db:
     image: postgres:16
@@ -25,6 +28,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  image-api:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    command: dotnet run --project ImageAPI
+    ports:
+      - 5104:5104
 
 volumes:
   postgres_data:

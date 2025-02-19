@@ -3,6 +3,12 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+#image api
+/images
+
+/bin
+/obj
+
 # dotenv files
 .env
 

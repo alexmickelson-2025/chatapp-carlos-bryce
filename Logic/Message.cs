@@ -8,7 +8,8 @@ public record Message
     public string content {get; set;}
     public string creationtime {get; set;}
     public int clockcounter {get; set;}
-    public Message(Guid clientid, string author, string content, string creationtime, int clockcounter)
+    public string? imagepath {get; set;}
+    public Message(Guid clientid, string author, string content, string creationtime, int clockcounter, string imagepath)
     {
         messageid = Guid.NewGuid();
         this.clientid = clientid;
@@ -16,5 +17,6 @@ public record Message
         this.content = content;
         this.creationtime = creationtime;
         this.clockcounter = clockcounter;
+        this.imagepath = imagepath;
     }
 }
