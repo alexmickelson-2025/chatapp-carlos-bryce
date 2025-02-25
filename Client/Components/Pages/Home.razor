@@ -50,14 +50,13 @@
     @foreach(var message in messages)
     {
         <div class="message-card">
-            <div class="message-time">ClientId: @message.clientid</div>
-            <div class="message-time">MessageId:@message.messageid</div>
             <div class="message-author"><strong>@message.author</strong></div>
             <div class="message-content">@message.content</div>
             <div class="message-time">@message.creationtime</div>
             <div class="message-time">@message.clockcounter</div>
-            <img src=@($"http://localhost:{ImageApiPort}/images/{message.imagepath}") alt="Could not load image"/>
+            <img src="@($"http://localhost:{imagePathToPort[message.imagepath]}/images/{message.imagepath}")" style="max-width: 100px; height: auto;" alt="Could not load image"/>
         </div>
+        
     }
 </div>
 
@@ -67,7 +66,6 @@
     public HttpClient httpClient = new HttpClient();
     string url = Environment.GetEnvironmentVariable("API_URL") ?? throw new Exception("API_URL environment variable not set");
     string ImageApiPort = Environment.GetEnvironmentVariable("IMAGE_API_PORT") ?? throw new Exception("IMAGE_API_PORT environment variable not set");
-
     string author;
     string messageContent;
     IBrowserFile? imageToUpload;
@@ -77,7 +75,7 @@
     int localCounter = 0;
     Guid Id = Guid.NewGuid();
     string apiWorks = "Nothing yet";
-
+    Dictionary<string, int> imagePathToPort = new Dictionary<string, int>();
 
     private async Task createMessage()
     {
@@ -119,12 +117,12 @@
 
         Console.WriteLine("new Message was " + content);
 
-        await httpClient.PostAsync(url + "/api/message/addMessage", content);
+        await httpClient.PostAsync(url + "/messagesapi/api/message/addMessage", content);
 
     }
     private async Task getAllMessages()
     {
-        messages = await httpClient.GetFromJsonAsync<List<Message>>(url + "/api/message/getMessages");
+        messages = await httpClient.GetFromJsonAsync<List<Message>>(url + "/messagesapi/api/message/getMessages");
 
         if (messages is null)
         {
@@ -142,7 +140,13 @@
             .OrderBy(m => m.clockcounter)
             .ThenBy(m => m.clientid)
             .ToList();
+
+        foreach(var message in messages)
+        {
+            imagePathToPort[message.imagepath] = await httpClient.GetFromJsonAsync<int>(url + $"/messagesapi/api/message/getPort?imagePath={message.imagepath}");
     }
+        }
+    
     private async Task deleteAllMessages(MouseEventArgs args)
     {
         await httpClient.DeleteAsync(url + "/api/message/deleteAllMessages");

@@ -8,8 +8,11 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 
+string runningPort = Environment.GetEnvironmentVariable("RUNNING_PORT") ?? throw new Exception("RUNNING_PORT environment variable not set");
+
+
 builder.Services.AddSwaggerGen();
-builder.WebHost.UseUrls("http://0.0.0.0:5104");
+builder.WebHost.UseUrls("http://0.0.0.0:" + runningPort);
 
 builder.Services.AddCors(options =>
     {
@@ -33,7 +36,7 @@ app.UseSwaggerUI();
 
 app.MapStaticAssets();
 
-app.MapGet("/", () => "Hello");
+app.MapGet("/images/{id}/health", (int id) => "Hello");
 
 app.UseCors(c => c.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 app.UseAuthorization();

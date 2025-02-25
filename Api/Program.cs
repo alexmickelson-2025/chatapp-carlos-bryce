@@ -26,7 +26,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 
-app.MapGet("/", () => "healthy");
+app.MapGet("/messagesapi/health", () => "healthy");
 app.MapGet("/api", () => "something else");
 
 app.MapControllers();

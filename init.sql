@@ -9,3 +9,9 @@ CREATE TABLE message (
     clockCounter INT NOT NULL,
     imagePath VARCHAR(255)
 );
+
+CREATE TABLE imageapi (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    imagePath VARCHAR(255) NOT NULL,
+    apiPort INT NOT NULL
+)

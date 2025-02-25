@@ -5,21 +5,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[Route("/api/[controller]")]
+[Route("/messagesapi/api/[controller]")]
 public class MessageController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    string IntervalDelay = Environment.GetEnvironmentVariable("INTERVAL_DELAY") ?? throw new Exception("INTERVAL_DELAY environment variable not set");
+    private Dictionary<int, int> portToApiNum = new Dictionary<int, int>{
+        {5105, 1},
+        {5106, 2},
+        {5107, 3}
+    };
+
     public MessageController(ApplicationDbContext context)
     {
         _context = context;
     }
 
     [HttpPost("addMessage")]
-    public async Task PostMessage([FromForm(Name ="message")] string message, [FromForm(Name ="image")]IFormFile? image)
+    public async Task PostMessage([FromForm(Name = "message")] string message, [FromForm(Name = "image")] IFormFile? image)
     {
+        await Task.Delay(int.Parse(IntervalDelay));
         Console.WriteLine("Receieved message to add" + message);
         Message receivedMessage = JsonSerializer.Deserialize<Message>(message);
-        
+
         string imagePath = null;
 
         if (image != null)
@@ -39,12 +47,26 @@ public class MessageController : ControllerBase
     [HttpGet("getMessages")]
     public async Task<List<Message>> GetMessages()
     {
+        await Task.Delay(int.Parse(IntervalDelay));
         Console.WriteLine("Getting messages");
         var messages = await _context.message.ToListAsync();
         messages = messages.OrderBy(x => Random.Shared.Next()).ToList();
         Console.WriteLine("There were " + messages.Count + " message found");
         return messages;
     }
+
+    [HttpGet("getPort")]
+    public async Task<int> GetPort([FromQuery] string imagePath)
+    {
+        await Task.Delay(int.Parse(IntervalDelay));
+        Console.WriteLine($"received image path : {imagePath}");
+        Console.WriteLine("Getting port");
+        var imagePorts = await _context.imageapi.ToListAsync();
+        var port = imagePorts.Where(i => i.imagepath == imagePath).FirstOrDefault().apiport;
+        Console.WriteLine("The port found was " + port);
+        return port;
+    }
+
 
     [HttpDelete("deleteAllMessages")]
     public async Task DeleteAllMessages()
@@ -69,13 +91,24 @@ public class MessageController : ControllerBase
         MultipartFormDataContent content = new MultipartFormDataContent();
         content.Add(fileContent, "image", file.Name);  // "image" should match your server-side parameter name
 
-        var response = await httpClient.PostAsync(Imageurl + "/Image/addImage", content);
+        //TODO: generate random number 0,1, or 2. use that as the api
+        Random random = new Random();
+        int randomPort = random.Next(5105, 5108);
+
+        Console.WriteLine("Before adding image url was " + Imageurl + "/images/" + portToApiNum[randomPort] + "/addImage");
+
+        await Task.Delay(int.Parse(IntervalDelay));
+        var response = await httpClient.PostAsync(Imageurl + "/images/" + portToApiNum[randomPort] + "/addImage", content);
         Console.WriteLine("Response from adding image was " + response);
+
+        string filePath = await response.Content.ReadAsStringAsync();
+        _context.imageapi.Add(new ImageApi(filePath, randomPort));
+        await _context.SaveChangesAsync();
 
         if (response.IsSuccessStatusCode)
         {
-            Console.WriteLine("Image uploaded successfully! Name was " + await response.Content.ReadAsStringAsync());
-            return await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Image uploaded successfully! Name was " + filePath + " and port was " + randomPort);
+            return filePath;
         }
         else
         {
