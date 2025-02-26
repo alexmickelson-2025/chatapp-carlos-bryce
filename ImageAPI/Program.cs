@@ -34,8 +34,6 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapStaticAssets();
-
 app.MapGet("/images/{id}/health", (int id) => "Hello");
 
 app.UseCors(c => c.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());

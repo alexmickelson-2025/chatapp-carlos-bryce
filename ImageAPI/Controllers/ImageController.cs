@@ -37,4 +37,25 @@ public class ImageController : ControllerBase
 
         return fileName;
     }
+
+    [HttpGet("images/{redirectId}/getImage")]
+    public async Task<IActionResult> GetImage([FromRoute] string redirectId, [FromQuery] string imagePath)
+    {
+        Console.WriteLine("redirectId was " + redirectId);
+        await Task.Delay(int.Parse(IntervalDelay));
+
+        var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+        var filePath = Path.Combine(imageDirectory, imagePath);
+
+        Console.WriteLine("I need to look for the image at url: " + filePath);
+
+        if (!System.IO.File.Exists(filePath))
+        {
+            throw new Exception("File not found");
+        }
+
+        var imageBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+        //Im hardcoing png because that's the only type of images we accept
+        return File(imageBytes, "image/png");
+    }
 }
