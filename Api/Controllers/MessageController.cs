@@ -24,7 +24,6 @@ public class MessageController : ControllerBase
     [HttpPost("addMessage")]
     public async Task PostMessage([FromForm(Name = "message")] string message, [FromForm(Name = "image")] IFormFile? image)
     {
-        await Task.Delay(int.Parse(IntervalDelay));
         Console.WriteLine("Receieved message to add" + message);
         Message receivedMessage = JsonSerializer.Deserialize<Message>(message);
 
@@ -47,7 +46,6 @@ public class MessageController : ControllerBase
     [HttpGet("getMessages")]
     public async Task<List<Message>> GetMessages()
     {
-        await Task.Delay(int.Parse(IntervalDelay));
         Console.WriteLine("Getting messages");
         var messages = await _context.message.ToListAsync();
         messages = messages.OrderBy(x => Random.Shared.Next()).ToList();
@@ -58,7 +56,6 @@ public class MessageController : ControllerBase
     [HttpGet("getPort")]
     public async Task<int> GetPort([FromQuery] string imagePath)
     {
-        await Task.Delay(int.Parse(IntervalDelay));
         Console.WriteLine($"received image path : {imagePath}");
         Console.WriteLine("Getting port");
         var imagePorts = await _context.imageapi.ToListAsync();
@@ -97,7 +94,6 @@ public class MessageController : ControllerBase
 
         Console.WriteLine("Before adding image url was " + Imageurl + "/images/" + portToApiNum[randomPort] + "/addImage");
 
-        await Task.Delay(int.Parse(IntervalDelay));
         var response = await httpClient.PostAsync(Imageurl + "/images/" + portToApiNum[randomPort] + "/addImage", content);
         Console.WriteLine("Response from adding image was " + response);
 

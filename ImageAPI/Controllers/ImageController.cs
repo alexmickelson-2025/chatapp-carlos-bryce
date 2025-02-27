@@ -1,4 +1,6 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 
 namespace ImageAPI.Controllers;
 
@@ -11,7 +13,6 @@ public class ImageController : ControllerBase
     public async Task<string> AddImage([FromRoute] string redirectId, [FromForm(Name = "image")] IFormFile image)
     {
         Console.WriteLine("redirectId was " + redirectId);
-        await Task.Delay(int.Parse(IntervalDelay));
         Guid newName = Guid.NewGuid();
 
         Console.WriteLine("Inside of /addImage");
@@ -39,23 +40,34 @@ public class ImageController : ControllerBase
     }
 
     [HttpGet("images/{redirectId}/getImage")]
-    public async Task<IActionResult> GetImage([FromRoute] string redirectId, [FromQuery] string imagePath)
+    public async Task<IActionResult> GetImage([FromRoute] string redirectId, [FromQuery] string imagePath, IConnectionMultiplexer redis)
     {
         Console.WriteLine("redirectId was " + redirectId);
-        await Task.Delay(int.Parse(IntervalDelay));
+
+        var db = redis.GetDatabase();
+        string possibleImageAsString = await db.StringGetAsync(imagePath);
 
         var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
         var filePath = Path.Combine(imageDirectory, imagePath);
 
-        Console.WriteLine("I need to look for the image at url: " + filePath);
-
-        if (!System.IO.File.Exists(filePath))
+        if (string.IsNullOrEmpty(possibleImageAsString))
         {
-            throw new Exception("File not found");
-        }
+            Console.Write("Image was not cached");
+            await Task.Delay(int.Parse(IntervalDelay));
+            var imageBytes = await System.IO.File.ReadAllBytesAsync(filePath);
 
-        var imageBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-        //Im hardcoing png because that's the only type of images we accept
-        return File(imageBytes, "image/png");
+            if (!System.IO.File.Exists(filePath))
+            {
+                throw new Exception("File not found");
+            }
+
+            await db.StringSetAsync(imagePath, Convert.ToBase64String(imageBytes), TimeSpan.FromMinutes(5));
+            return File(imageBytes, "image/png");
+        }
+        else{
+            Console.Write("Image was cached inside of redis");
+            byte[] imageAsBytes = Convert.FromBase64String(possibleImageAsString);
+            return File(imageAsBytes, "image/png");
+        }
     }
 }

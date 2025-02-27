@@ -54,9 +54,8 @@
             <div class="message-content">@message.content</div>
             <div class="message-time">@message.creationtime</div>
             <div class="message-time">@message.clockcounter</div>
-            <img src="@($"http://localhost:{imagePathToPort[message.imagepath]}/images/{message.imagepath}")" style="max-width: 100px; height: auto;" alt="Could not load image"/>
+            <img src="@($"http://localhost:8555/images/{portToAPINum[imagePathToPort[message.imagepath].ToString()]}/getImage?imagePath={message.imagepath}")" style="max-width: 100px; height: auto;" alt="Could not load image"/>
         </div>
-        
     }
 </div>
 
@@ -76,6 +75,13 @@
     Guid Id = Guid.NewGuid();
     string apiWorks = "Nothing yet";
     Dictionary<string, int> imagePathToPort = new Dictionary<string, int>();
+Dictionary<string, int> portToAPINum = new Dictionary<string, int>
+{
+    { "5105", 1 },
+    { "5106", 2 },
+    { "5107", 3 }
+};
+
 
     private async Task createMessage()
     {
