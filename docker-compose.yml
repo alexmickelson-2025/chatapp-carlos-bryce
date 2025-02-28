@@ -8,7 +8,7 @@ services:
       - API_URL=http://nginx
       - IMAGE_API_PORT=5104
     ports:
-      - 8080:8080
+      - 4812:4812
   api:
     build:
       context: .

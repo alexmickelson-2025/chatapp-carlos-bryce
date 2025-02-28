@@ -52,17 +52,17 @@ public class ImageController : ControllerBase
 
         if (string.IsNullOrEmpty(possibleImageAsString))
         {
-            Console.Write("Image was not cached");
-            await Task.Delay(int.Parse(IntervalDelay));
-            var imageBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+        Console.Write("Image was not cached");
+        await Task.Delay(int.Parse(IntervalDelay));
+        var imageBytes = await System.IO.File.ReadAllBytesAsync(filePath);
 
-            if (!System.IO.File.Exists(filePath))
-            {
-                throw new Exception("File not found");
-            }
+        if (!System.IO.File.Exists(filePath))
+        {
+            throw new Exception("File not found");
+        }
 
-            await db.StringSetAsync(imagePath, Convert.ToBase64String(imageBytes), TimeSpan.FromMinutes(5));
-            return File(imageBytes, "image/png");
+        await db.StringSetAsync(imagePath, Convert.ToBase64String(imageBytes), TimeSpan.FromMinutes(5));
+        return File(imageBytes, "image/png");
         }
         else{
             Console.Write("Image was cached inside of redis");

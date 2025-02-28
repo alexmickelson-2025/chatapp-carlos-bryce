@@ -150,8 +150,8 @@ Dictionary<string, int> portToAPINum = new Dictionary<string, int>
         foreach(var message in messages)
         {
             imagePathToPort[message.imagepath] = await httpClient.GetFromJsonAsync<int>(url + $"/messagesapi/api/message/getPort?imagePath={message.imagepath}");
-    }
         }
+    }
     
     private async Task deleteAllMessages(MouseEventArgs args)
     {
