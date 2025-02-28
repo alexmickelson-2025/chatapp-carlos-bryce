@@ -2,7 +2,7 @@ using Client.Components;
 using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://0.0.0.0:8080");
+builder.WebHost.UseUrls("http://0.0.0.0:4812");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
